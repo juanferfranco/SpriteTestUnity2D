@@ -1,6 +1,8 @@
 // Create a Sprite at startup.
 // Assign a Texture to the Sprite when the button is pressed.
 
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SpriteCreate : MonoBehaviour
@@ -25,6 +27,13 @@ public class SpriteCreate : MonoBehaviour
 
     private Sprite mySprite;
     public SpriteRenderer sr;
+
+    public GameObject textPrefab; // Asigna tu prefab de texto aquí
+    private GameObject textObject = null;
+    private int counter = 0;
+
+    public Camera mainCamera;
+
 
     void Awake()
     {
@@ -72,5 +81,44 @@ public class SpriteCreate : MonoBehaviour
         // Copy the pixel data to the texture and load it into the GPU.
         tex.SetPixels(pix);
         tex.Apply();
+    }
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mousePos.z = 0; // Asegúrate de que la posición Z no afecte la visualización
+
+            if(sr != null)
+            {
+                // Ajusta mouseWorldPos.z para asegurarte de que esté en el mismo plano que el objeto de la textura
+                mousePos.z = sr.transform.position.z;
+
+            }
+            if (sr.bounds.Contains(mousePos))
+            {
+                if (textObject != null)
+                {
+                    Destroy(textObject);
+                }
+                // Crea y posiciona el cuadro de texto
+
+                // Ajusta estos valores según la porción de la pantalla que desees que el canvas cubra
+                float desiredHeight = mainCamera.orthographicSize * 2;
+                float desiredWidth = desiredHeight * mainCamera.aspect;
+
+                textObject = Instantiate(textPrefab, mousePos, Quaternion.identity);
+
+                RectTransform canvasRect = textObject.GetComponent<RectTransform>();
+                canvasRect.sizeDelta = new Vector2(desiredWidth, desiredHeight);
+                canvasRect.transform.localScale = Vector3.one * 2f; // Ajusta este valor según sea necesario
+
+                //textObject.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+
+                textObject.GetComponentInChildren<TextMeshProUGUI>().text = counter.ToString(); // Asegúrate de ajustar esto si usas otro tipo de componente de texto
+                counter++;
+            }
+        }
     }
 }
