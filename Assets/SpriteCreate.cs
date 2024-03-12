@@ -33,7 +33,7 @@ public class SpriteCreate : MonoBehaviour
     private int counter = 0;
 
     public Camera mainCamera;
-
+    public float canvasScale = 0.2f; 
 
     void Awake()
     {
@@ -90,35 +90,23 @@ public class SpriteCreate : MonoBehaviour
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             mousePos.z = 0; // Asegúrate de que la posición Z no afecte la visualización
 
-            if(sr != null)
-            {
-                // Ajusta mouseWorldPos.z para asegurarte de que esté en el mismo plano que el objeto de la textura
-                mousePos.z = sr.transform.position.z;
-
-            }
-            if (sr.bounds.Contains(mousePos))
+            if (sr != null && sr.bounds.Contains(mousePos))
             {
                 if (textObject != null)
                 {
                     Destroy(textObject);
                 }
-                // Crea y posiciona el cuadro de texto
 
-                // Ajusta estos valores según la porción de la pantalla que desees que el canvas cubra
-                float desiredHeight = mainCamera.orthographicSize * 2;
-                float desiredWidth = desiredHeight * mainCamera.aspect;
-
+                // Instancia el nuevo objeto de texto
                 textObject = Instantiate(textPrefab, mousePos, Quaternion.identity);
+                RectTransform canvasRectTransform = textObject.GetComponent<RectTransform>();
+                canvasRectTransform.localScale = new Vector3(canvasScale, canvasScale, 1);
 
-                RectTransform canvasRect = textObject.GetComponent<RectTransform>();
-                canvasRect.sizeDelta = new Vector2(desiredWidth, desiredHeight);
-                canvasRect.transform.localScale = Vector3.one * 2f; // Ajusta este valor según sea necesario
-
-                //textObject.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-
-                textObject.GetComponentInChildren<TextMeshProUGUI>().text = counter.ToString(); // Asegúrate de ajustar esto si usas otro tipo de componente de texto
+                textObject.GetComponentInChildren<TextMeshProUGUI>().text = counter.ToString();
                 counter++;
             }
+
+
         }
     }
 }
